@@ -1,0 +1,43 @@
+body{
+    margin: 4 !important;
+    background-color: #AECE8B;
+    color: #35381B;
+    font-family: Roboto, HelveticaNeue, Arial, sans-serif;
+}
+
+#game{
+    width: 1024px;
+    margin-left: 50%;
+    transform: translateX(-50%);
+}
+
+#manage{
+    font-size: 25px;
+}
+
+#manage span{
+    font-weight: bolder;
+}
+
+#message{
+    position: absolute;
+    display: none;
+    left: 50%;
+    top: 300px;
+    transform: translateX(-50%);
+    font-size: 30px;
+    text-align: center;
+    width: 300px;
+}
+
+#field{
+    width: 100%; 
+    height: 512px; 
+    background-color: #8EB366;
+    border: 2px solid #35381B;
+}
+
+#score{
+    font-size: 30px;
+    font-style: normal;
+}

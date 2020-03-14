@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="style.css">
+    <script src="game.js"></script>
+    <title>Snake</title>
+</head>
+<body>
+    <div id="game">
+        <div id="score" style="padding: 2px">Score: 0</div>
+        <canvas id="field" style=""></canvas>
+        <div id="manage">
+            Press <span>&#8592;</span>, <span>&#8593;</span>, <span>&#8594;</span> or <span>&#8595;</span> to turn
+        </div>
+    </div>
+    <div id="message" onclick="start()"></div>
+    <script>
+        window.onload = message.call(null, "Start Game");
+        document.addEventListener('keydown', keyboard);
+    </script>
+</body>
+</html>
