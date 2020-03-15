@@ -3,6 +3,7 @@ var height, width;
 var queue = [];
 var food = 0;
 var score;
+var record;
 
 function randint(max){
     return Math.floor(Math.random() * max);
@@ -117,7 +118,6 @@ class Snake{
     }
     eat(){
         var head = this.cells[this.cells.length - 1];
-        console.log(food.posx, food.posy, head.posx, head.posy)
         if(food.posx == head.posx && food.posy == head.posy){
             food = 0;
             ++score;
@@ -150,7 +150,8 @@ function message(msg){
 }
 
 function update_score(){
-    document.getElementById('score').innerText = "Score: " + score;
+    var msg = score + '/' + Math.max(score, get_record());
+    document.getElementById('score').innerText = "Score: " + msg;
 }
 
 function keyboard(event){
@@ -171,6 +172,16 @@ function keyboard(event){
     }
 }
 
+function get_record(){
+    var rcd = localStorage.getItem('record');
+    return Number(rcd) || 0;
+}
+
+function set_record(rcd){
+    if(rcd > get_record())
+        localStorage.setItem('record', rcd);
+}
+
 function start(){
     document.getElementById('message').style.display = 'none';
     var canvas = document.getElementById('field');
@@ -178,6 +189,7 @@ function start(){
     width = canvas.width;
     field = canvas.getContext('2d');
     score = 0;
+    record = get_record();
     update_score();
     var snake = new Snake();
     snake.draw();
@@ -189,6 +201,7 @@ function start(){
             snake.eat();
         if(!snake.check()){
             clearInterval(interval);
+            set_record(score);
             message("Restart Game");
             return;
         }
