@@ -9,16 +9,41 @@ function randint(max){
     return Math.floor(Math.random() * max);
 }
 
+class Animation{
+    constructor(period){
+        this.period = period;
+        this.step = 0;
+        this.state = 0;
+    }
+    check(){
+        if(this.step == this.period){
+            this.step = 0;
+            this.state = !this.state;
+        }
+        ++this.step;
+        return this.state;
+    }
+}
+
 class Food{
-    constructor(x, y){
+    constructor(x, y, tl, points, color){
         this.posx = x;
         this.posy = y;
-        this.tl = 40;
+        this.tl = tl;
+        this.points = points;
+        this.color = color;
+        this.animation = new Animation(2);
     }
     draw(){
-        field.fillStyle = 'red';
+        field.fillStyle = this.color;
         field.beginPath();
-        field.arc(this.posx, this.posy, 3, 0, 2 * Math.PI);
+        var radius = 3;
+        if(this.tl > 0){
+            radius = this.animation.check() ? 3 : 4;
+            this.points = this.tl;
+        }
+        field.arc(this.posx, this.posy, radius, 0, 2 * Math.PI);
+        ++this.step;
         field.fill();
     }
 }
@@ -101,46 +126,60 @@ class Snake{
         return 1;
     }
     growup(){
-        var x = this.cells[0].posx;
-        var y = this.cells[0].posy;
-        var df = this.cells[0].df;
-        var cell;
-        if(df == 1)
-            cell = new Cell(x - 6, y);
-        else if(df == -1)
-            cell = new Cell(x + 6, y);
-        else if(df == 2)
-            cell = new Cell(x, y + 6);
-        else if(df == -2)
-            cell = new Cell(x, y - 6);
-        cell.df = df;
-        this.cells.unshift(cell);
+        var cnt = 0;
+        if(this.cells.length < 14){
+            cnt = 1;
+        }else if(this.cells.length < 24){
+            cnt = 2;
+        }else if(this.cell.length < 44){
+            cnt = 3;
+        }else{
+            cnt = 4;
+        }
+        for(var i = 0; i < cnt; ++i){
+            var x = this.cells[0].posx;
+            var y = this.cells[0].posy;
+            var df = this.cells[0].df;
+            var cell;
+            if(df == 1)
+                cell = new Cell(x - 6, y);
+            else if(df == -1)
+                cell = new Cell(x + 6, y);
+            else if(df == 2)
+                cell = new Cell(x, y + 6);
+            else if(df == -2)
+                cell = new Cell(x, y - 6);
+            cell.df = df;
+            this.cells.unshift(cell);
+        }
     }
     eat(){
         var head = this.cells[this.cells.length - 1];
         if(food.posx == head.posx && food.posy == head.posy){
+            score += food.points;
             food = 0;
-            ++score;
             update_score();
             this.growup();
         }
     }
-    gen_food(){
-        if(randint(100) < 92) return 0;
-        var success;
-        var x, y;
-        do{
-            success = 1;
-            x = randint(50) * 6 + 3;
-            y = randint(25) * 6 + 3;
-            this.cells.forEach(cell => {
-                if(cell.posx == x && cell.posy == y){
-                    success = 0;
-                }
-            });
-        }while(!success);
-        return new Food(x, y);
-    }
+}
+
+function get_food(snake){
+    var success;
+    var x, y;
+    do{
+        success = 1;
+        x = randint(50) * 6 + 3;
+        y = randint(25) * 6 + 3;
+        snake.cells.forEach(cell => {
+            if(cell.posx == x && cell.posy == y){
+                success = 0;
+            }
+        });
+    }while(!success);
+    if(randint(100) < 25)
+        return new Food(x, y, 60, 0, 'red');
+    return new Food(x, y, -1, 1, 'blue');
 }
 
 function message(msg){
@@ -168,6 +207,10 @@ function keyboard(event){
         }case 'ArrowDown': {
             queue.push(-2);
             break;
+        }case 'Enter': {
+            if(document.getElementById('message').style.display == 'block'){
+                start();
+            }
         }
     }
 }
@@ -193,25 +236,32 @@ function start(){
     update_score();
     var snake = new Snake();
     snake.draw();
+    var step = 0;
+    var period = 15;
     var interval = setInterval(function(){
-        field.clearRect(0, 0, width, height);
-        snake.turn();
-        snake.move();
-        if(food)
+        if(step % period == 0){
+            field.clearRect(0, 0, width, height);
+            period = Math.max(6, 15 - Math.floor(score / snake.cells.length / snake.cells.length));
+            snake.turn();
+            snake.move();if(food)
             snake.eat();
-        if(!snake.check()){
-            clearInterval(interval);
-            set_record(score);
-            message("Restart Game");
-            return;
+            if(!snake.check()){
+                clearInterval(interval);
+                set_record(score);
+                message("Restart Game");
+                return;
+            }
+            if(food){
+                if(step % 15 == 0)
+                    --food.tl;
+                if(!food.tl) food = 0;
+                else food.draw();
+            }else{
+                food = get_food(snake);
+            }
+            snake.draw();
         }
-        if(food){
-            --food.tl;
-            if(!food.tl) food = 0;
-            else food.draw();
-        }else{
-            food = snake.gen_food();
-        }
-        snake.draw();
-    }, 150);
+        ++step;
+        if(step == 1980000) step = 0;
+    }, 10);
 }
